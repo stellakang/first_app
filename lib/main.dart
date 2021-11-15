@@ -1,4 +1,3 @@
-import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +11,7 @@ List<Item> todos = List.generate(
     'A description of what nees to be done for Todo $i',
   ),
 );
-List<Item> memos = [];
+// List<Item> memos = [];
 List<Item> routines = [];
 GlobalKey<FormState> myFormKey = GlobalKey();
 
@@ -88,7 +87,7 @@ class InputDescription extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: TextField(
-          decoration: InputDecoration(
+        decoration: InputDecoration(
         border: const OutlineInputBorder(),
         labelText: labelText,
       )),
@@ -218,42 +217,42 @@ class _RoutineSelectionScreenState extends State<RoutineSelectionScreen> {
   }
 }
 
-class MemoSelectionScreen extends StatefulWidget {
-  @override
-  _MemoSelectionScreenState createState() => _MemoSelectionScreenState();
-}
+// class MemoSelectionScreen extends StatefulWidget {
+//   @override
+//   _MemoSelectionScreenState createState() => _MemoSelectionScreenState();
+// }
 
-class _MemoSelectionScreenState extends State<MemoSelectionScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.indigo[100],
-      appBar: AppBar(
-        title: const Text('Write Memo'),
-      ),
-      body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const InputTitle(labelText: 'Title'),
-              const InputDescription(labelText: 'Notes'),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SubmitButton(context: context, popText: 'New Memo Added.'),
-                  CancelButton(context: context),
-                ],
-              ),
-            ],
-          ),
-        ],
-      )),
-    );
-  }
-}
+// class _MemoSelectionScreenState extends State<MemoSelectionScreen> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.indigo[100],
+//       appBar: AppBar(
+//         title: const Text('Write Memo'),
+//       ),
+//       body: Center(
+//           child: Column(
+//         mainAxisAlignment: MainAxisAlignment.center,
+//         children: <Widget>[
+//           Column(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: [
+//               const InputTitle(labelText: 'Title'),
+//               const InputDescription(labelText: 'Notes'),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: [
+//                   SubmitButton(context: context, popText: 'New Memo Added.'),
+//                   CancelButton(context: context),
+//                 ],
+//               ),
+//             ],
+//           ),
+//         ],
+//       )),
+//     );
+//   }
+// }
 
 class TodoSelectionScreen extends StatefulWidget {
   @override
@@ -400,51 +399,51 @@ class _ReportState extends State<Report> {
   }
 }
 
-class MemoWidget extends StatefulWidget {
-  @override
-  _MemoState createState() => _MemoState();
-}
+// class MemoWidget extends StatefulWidget {
+//   @override
+//   _MemoState createState() => _MemoState();
+// }
 
-class _MemoState extends State<MemoWidget> {
-  ListView memosView = ListView.builder(
-    itemCount: memos.length,
-    itemBuilder: (context, index) {
-      return ListTile(
-          title: GestureDetector(
-              child: Hero(
-                tag: 'backToHome',
-                child: Text(memos[index].title),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailScreen(item: memos[index]),
-                  ),
-                );
-              }));
-    },
-  );
+// class _MemoState extends State<MemoWidget> {
+//   ListView memosView = ListView.builder(
+//     itemCount: memos.length,
+//     itemBuilder: (context, index) {
+//       return ListTile(
+//           title: GestureDetector(
+//               child: Hero(
+//                 tag: 'backToHome',
+//                 child: Text(memos[index].title),
+//               ),
+//               onTap: () {
+//                 Navigator.push(
+//                   context,
+//                   MaterialPageRoute(
+//                     builder: (context) => DetailScreen(item: memos[index]),
+//                   ),
+//                 );
+//               }));
+//     },
+//   );
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        color: Colors.indigo[100],
-        child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                      child: SelectedItem(
-                    buttonName: "+ Add Memo",
-                    selectionScreen: MemoSelectionScreen(),
-                  ))),
-              Expanded(child: memosView),
-            ]));
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//         color: Colors.indigo[100],
+//         child: Column(
+//             mainAxisSize: MainAxisSize.max,
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: <Widget>[
+//               Padding(
+//                   padding: const EdgeInsets.all(8.0),
+//                   child: Center(
+//                       child: SelectedItem(
+//                     buttonName: "+ Add Memo",
+//                     selectionScreen: MemoSelectionScreen(),
+//                   ))),
+//               Expanded(child: memosView),
+//             ]));
+//   }
+// }
 
 class MyApp extends StatefulWidget {
   @override
@@ -484,7 +483,7 @@ class _MyApp extends State<MyApp> {
               onPageChanged: (index) {
                 setState(() => _currentIndex = index);
               },
-              children: <Widget>[Home(), Routine(), Report(), MemoWidget()])),
+              children: <Widget>[Home(), Routine(), Report()])),
       bottomNavigationBar: BottomNavyBar(
         selectedIndex: _currentIndex,
         onItemSelected: (index) {
@@ -499,20 +498,20 @@ class _MyApp extends State<MyApp> {
             inactiveColor: Colors.grey,
           ),
           BottomNavyBarItem(
-              title: const Center(child: Text('Daily Routine')),
+              title: const Center(child: Text('Routine')),
               icon: const Icon(Icons.today),
               activeColor: Colors.lightGreen,
               inactiveColor: Colors.grey),
           BottomNavyBarItem(
-              title: const Center(child: Text('Report')),
+              title: const Center(child: Text('Calendar')),
               icon: const Icon(Icons.note),
               activeColor: Colors.orange,
               inactiveColor: Colors.grey),
-          BottomNavyBarItem(
-              title: const Center(child: Text('Memo')),
-              icon: const Icon(Icons.note_add_outlined),
-              activeColor: Colors.indigo,
-              inactiveColor: Colors.grey),
+          // BottomNavyBarItem(
+          //     title: const Center(child: Text('Memo')),
+          //     icon: const Icon(Icons.note_add_outlined),
+          //     activeColor: Colors.indigo,
+          //     inactiveColor: Colors.grey),
         ],
       ),
     );
