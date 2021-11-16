@@ -1,18 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:date_range_form_field/date_range_form_field.dart';
 
-List<Item> todos = List.generate(
-  20,
-  (i) => Item(
-    'Todo $i',
-    'A description of what nees to be done for Todo $i',
-  ),
-);
-// List<Item> memos = [];
-List<Item> routines = [];
 GlobalKey<FormState> myFormKey = GlobalKey();
 
 void main() {
@@ -27,6 +18,30 @@ class Item {
   final String description;
 
   Item(this.title, this.description);
+}
+
+class TodoList with ChangeNotifier {
+  List<List> todos = [];
+  void add(String title, String description, String date) {
+    todos.add([title, description, date]);
+    notifyListeners();
+  }
+
+  List<List> getTodo() {
+    return todos;
+  }
+}
+
+class RoutineList with ChangeNotifier {
+  List<Item> routines = [];
+  void add(String title, String description) {
+    routines.add(Item(title = title, description = description));
+    notifyListeners();
+  }
+
+  List<Item> getRoutine() {
+    return routines;
+  }
 }
 
 class SelectedItem extends StatelessWidget {
@@ -62,44 +77,50 @@ DateTimeRange? myDateRange;
 
 class InputTitle extends StatelessWidget {
   final String labelText;
-
-  const InputTitle({Key? key, required this.labelText}) : super(key: key);
+  final textController;
+  InputTitle({Key? key, required this.labelText, required this.textController}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.all(15.0),
         child: TextField(
+            controller: textController,
             decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          labelText: labelText,
-        )));
+              border: const OutlineInputBorder(),
+              labelText: labelText,
+            )));
   }
 }
 
 class InputDescription extends StatelessWidget {
   final String labelText;
-
-  const InputDescription({Key? key, required this.labelText}) : super(key: key);
+  final textController;
+  const InputDescription({Key? key, required this.labelText, required this.textController}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: TextField(
-        decoration: InputDecoration(
-        border: const OutlineInputBorder(),
-        labelText: labelText,
-      )),
+          controller: textController,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            labelText: labelText,
+          )),
     );
   }
 }
 
-class SubmitButton extends StatelessWidget {
+class TodoSubmitButton extends StatelessWidget {
+  final titleController;
+  final descController;
+  final dateController;
   final String popText;
   final BuildContext context;
 
-  const SubmitButton({Key? key, required this.context, required this.popText})
+  TodoSubmitButton(
+      {Key? key, required this.context, required this.popText, required this.titleController, required this.descController, required this.dateController})
       : super(key: key);
 
   void _submitForm() {
@@ -109,13 +130,47 @@ class SubmitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TodoList todos = Provider.of<TodoList>(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
         onPressed: () {
           _submitForm();
-          todos.add(Item('a', 'bb'));
+          todos.add(titleController.text, descController.text, dateController.text);
           Navigator.pop(context, popText);
+        },
+        child: const Text('Submit'),
+      ),
+    );
+  }
+}
+
+class RoutineSubmitButton extends StatelessWidget {
+  final titleController;
+  final descController;
+  final String description = "";
+  final String popText;
+  final BuildContext context;
+
+  const RoutineSubmitButton(
+      {Key? key, required this.context, required this.popText, required this.titleController, required this.descController})
+      : super(key: key);
+
+  void _submitForm() {
+    final FormState? form = myFormKey.currentState;
+    form!.save();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    RoutineList routines = Provider.of<RoutineList>(context);
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        onPressed: () {
+          _submitForm();
+          Navigator.pop(context, popText);
+          routines.add(titleController.text, descController.text);
         },
         child: const Text('Submit'),
       ),
@@ -126,8 +181,7 @@ class SubmitButton extends StatelessWidget {
 class CancelButton extends StatelessWidget {
   final BuildContext context;
 
-  const CancelButton({Key? key, required this.context})
-      : super(key: key);
+  const CancelButton({Key? key, required this.context}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +237,16 @@ class RoutineSelectionScreen extends StatefulWidget {
   _RoutineSelectionScreenState createState() => _RoutineSelectionScreenState();
 }
 
+final routineTitleController = TextEditingController();
+final routineDescController = TextEditingController();
+
 class _RoutineSelectionScreenState extends State<RoutineSelectionScreen> {
+  final textTitle = InputTitle(
+    labelText: 'Routine name',
+    textController: routineTitleController,
+  );
+  final textDesc = InputDescription(labelText: 'Description', textController: routineDescController);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -198,14 +261,13 @@ class _RoutineSelectionScreenState extends State<RoutineSelectionScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const InputTitle(
-                labelText: 'Routine name',
-              ),
-              const InputDescription(labelText: 'Description'),
+              textTitle,
+              textDesc,
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SubmitButton(context: context, popText: 'New Routine Added'),
+                  RoutineSubmitButton(
+                      context: context, popText: 'New Routine Added', titleController: routineTitleController, descController: routineDescController,),
                   CancelButton(context: context),
                 ],
               ),
@@ -254,6 +316,10 @@ class _RoutineSelectionScreenState extends State<RoutineSelectionScreen> {
 //   }
 // }
 
+final todoTitleController = TextEditingController();
+final todoDescController = TextEditingController();
+final todoDateController = TextEditingController();
+
 class TodoSelectionScreen extends StatefulWidget {
   @override
   _TodoSelectionScreenState createState() => _TodoSelectionScreenState();
@@ -274,15 +340,17 @@ class _TodoSelectionScreenState extends State<TodoSelectionScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const InputTitle(
+              InputTitle(
                 labelText: 'Todo',
+                textController: todoTitleController,
               ),
-              const InputDescription(labelText: 'Description'),
+              InputDescription(labelText: 'Description', textController: todoDescController,),
               MyFormField(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SubmitButton(context: context, popText: 'New Plan Added.'),
+                  TodoSubmitButton(
+                      context: context, popText: 'New Plan Added.', titleController: todoTitleController, descController: todoDescController, dateController: todoDateController,),
                   CancelButton(context: context),
                 ],
               ),
@@ -302,26 +370,29 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  ListView todosView = ListView.builder(
-    itemCount: todos.length,
-    itemBuilder: (context, index) {
-      return ListTile(
-          title: GestureDetector(
-              child: Hero(
-                tag: 'backToHome',
-                child: Text(todos[index].title),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailScreen(item: todos[index]),
-                  ),
-                );
-              }));
-    },
-  );
   Widget build(BuildContext context) {
+    TodoList todos = Provider.of<TodoList>(context);
+    List<List> todoList = todos.getTodo();
+    ListView todosView = ListView.builder(
+      itemCount: todos.getTodo().length,
+      itemBuilder: (context, index) {
+        return ListTile(
+            title: GestureDetector(
+                child: Hero(
+                  tag: 'backToHome',
+                  child: Text(todoList[index][0]),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetailScreen(
+                          item: Item(todoList[index][0], todoList[index][1])),
+                    ),
+                  );
+                }));
+      },
+    );
     return Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -344,27 +415,31 @@ class Routine extends StatefulWidget {
 }
 
 class _RoutineState extends State<Routine> {
-  ListView routinesView = ListView.builder(
-    itemCount: routines.length,
-    itemBuilder: (context, index) {
-      return ListTile(
-          title: GestureDetector(
-              child: Hero(
-                tag: 'backToHome',
-                child: Text(routines[index].title),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailScreen(item: routines[index]),
-                  ),
-                );
-              }));
-    },
-  );
   @override
   Widget build(BuildContext context) {
+    RoutineList routines = Provider.of<RoutineList>(context);
+    List<Item> routineList = routines.getRoutine();
+
+    ListView routinesView = ListView.builder(
+      itemCount: routineList.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+            title: GestureDetector(
+                child: Hero(
+                  tag: 'backToHome',
+                  child: Text(routineList[index].title),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DetailScreen(item: routineList[index]),
+                    ),
+                  );
+                }));
+      },
+    );
     return Container(
         color: Colors.lightGreen[100],
         child: Column(
@@ -458,7 +533,9 @@ class _MyApp extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    if (_pageController == null) {
+      _pageController = PageController();
+    }
   }
 
   @override
